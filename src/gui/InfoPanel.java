@@ -26,6 +26,7 @@ public class InfoPanel extends JPanel implements ActionListener{
 	private JLabel info;
 	private JButton infoButton;
 	private JButton routingInfoButton;
+	private JButton BlockchainInfoButton;
 	private Message selectedMessage;
 	private DTNHost selectedHost;
 	private DTNSimGUI gui;
@@ -64,9 +65,16 @@ public class InfoPanel extends JPanel implements ActionListener{
 		routingInfoButton = new JButton("routing info");
 		routingInfoButton.addActionListener(this);
 		
+		BlockchainInfoButton = new JButton("Blockchain info");
+		BlockchainInfoButton.addActionListener(this);
+		
 		this.add(new JLabel(text));
 		this.add(msgChooser);
 		this.add(routingInfoButton);
+		this.add(new JLabel("Blocks:" + host.blockchain.size()));
+		this.add(BlockchainInfoButton);
+		this.add(new JLabel("Interacting:" + host.Interacting()));
+		this.add(BlockchainInfoButton);
 		this.revalidate();
 	}
 	
@@ -128,6 +136,9 @@ public class InfoPanel extends JPanel implements ActionListener{
 		}
 		else if (e.getSource() ==  this.routingInfoButton) {
 			new RoutingInfoWindow(this.selectedHost);
+		}
+		else if (e.getSource() ==  this.BlockchainInfoButton) {
+			new BlockchainInfoWindow(this.selectedHost);
 		}
 	}
 	

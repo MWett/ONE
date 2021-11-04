@@ -10,6 +10,8 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -81,6 +83,9 @@ public class EventLogPanel extends JPanel
 	private EventLogControl msgDeliveredCheck;
 	private EventLogControl msgDropCheck;
 	private EventLogControl msgAbortCheck;
+	private EventLogControl blockchainCheck;
+	
+	private int debuglevel = 0;
 	
 	/**
 	 * Creates a new log panel
@@ -128,6 +133,7 @@ public class EventLogPanel extends JPanel
 		c.addHeading("connections");
 		conUpCheck = c.addControl("up");
 		conDownCheck = c.addControl("down");
+		blockchainCheck = c.addControl("blockchain");
 		c.addHeading("messages");
 		msgCreateCheck = c.addControl("created");
 		msgTransferStartCheck = c.addControl("started relay");
@@ -190,7 +196,40 @@ public class EventLogPanel extends JPanel
 			eventPanes.remove(0);
 		}
 	}
-	
+	private void addEvent(String description, DTNHost host1, Message message, boolean highlight) {
+		JPanel eventPane = new JPanel();
+		eventPane.setLayout(new BoxLayout(eventPane,BoxLayout.LINE_AXIS));
+		
+		String text = String.format(ENTRY_FORMAT, 
+				SimClock.getTime(),description);
+		JLabel label = new JLabel(text);
+		label.setFont(font);
+		eventPane.add(label);
+		
+		if (host1 != null) {
+			addInfoButton(eventPane,host1,HOST_PROP);
+		}
+		/*if (host2 != null) {
+			JLabel betweenLabel = new JLabel(HOST_DELIM);
+			betweenLabel.setFont(font);
+			eventPane.add(betweenLabel);
+			addInfoButton(eventPane,host2,HOST_PROP);
+		}*/
+		if (message != null) {
+			addInfoButton(eventPane, message, MSG_PROP);
+		}
+
+		if (highlight) {
+			eventPane.setBackground(HIGHLIGHT_BG_COLOR);
+		}
+		
+		eventPanes.add(eventPane);
+		
+		// if the log is full, remove oldest entries first
+		if (this.eventPanes.size() > maxNrofEvents) {
+			eventPanes.remove(0);
+		}
+	}
 	/**
 	 * Updates the log view
 	 */
@@ -260,7 +299,23 @@ public class EventLogPanel extends JPanel
 	
 	// Implementations of ConnectionListener and MessageListener interfaces
 	public void hostsConnected(DTNHost host1, DTNHost host2) {
+		long startTime = System.nanoTime();
 		processEvent(conUpCheck, "Connection UP", host1, host2, null);
+		long stopTime = System.nanoTime();
+		if (debuglevel == 1)System.out.println("ConUp: " + (stopTime - startTime));
+		startTime = System.nanoTime();
+		processEvent(blockchainCheck, "Updated PublicKeys!", host1, host2, null);
+		stopTime = System.nanoTime();
+		if (debuglevel == 1)System.out.println("PubKeys: " + (stopTime - startTime));
+		startTime = System.nanoTime();
+		processEvent(blockchainCheck, "Blockchain exchanged!", host1, host2, null);
+		stopTime = System.nanoTime();
+		if (debuglevel == 1)System.out.println("BCEx: " + (stopTime - startTime));
+		startTime = System.nanoTime();
+		processEvent(blockchainCheck, "Added Message to Blockchain!", host1, host2, null);
+		stopTime = System.nanoTime();
+		if (debuglevel == 1)System.out.println("AddMsg: " + (stopTime - startTime));
+		startTime = System.nanoTime();
 	}
 
 	public void hostsDisconnected(DTNHost host1, DTNHost host2) {

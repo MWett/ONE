@@ -46,7 +46,7 @@ public class MainWindow extends JFrame {
 	private static final double SPLIT_PANE_LOG_WEIGHT = 0.2;
 	
 	private JScrollPane playFieldScroll;
-	
+	public NodeChooser chooser;
     public MainWindow(String scenName, World world, PlayField field,
     		GUIControls guiControls, InfoPanel infoPanel,
     		EventLogPanel elp, DTNSimGUI gui) {    	
@@ -61,7 +61,7 @@ public class MainWindow extends JFrame {
         JSplitPane logControlSplit;
         JSplitPane mainSplit;
         Settings s = new Settings(GUI_WIN_NS);
-        NodeChooser chooser = new NodeChooser(world.getHosts(),gui);
+        this.chooser = new NodeChooser(world.getHosts(),gui);
         
     	setLayout(new BorderLayout());
         setJMenuBar(new SimMenuBar(field, chooser));

@@ -4,12 +4,21 @@
  */
 package ui;
 
+import java.lang.reflect.InvocationTargetException;
+
+import javax.swing.SwingUtilities;
+
 import core.SimClock;
 
 /**
  * Simple text-based user interface.
  */
 public class DTNSimTextUI extends DTNSimUI {
+	public DTNSimTextUI(int runindex) {
+		super(runindex);
+		// TODO Auto-generated constructor stub
+	}
+
 	private long lastUpdateRt;	// real time of last ui update
 	private long startTime; // simulation start time
 	/** How often the UI view is updated (milliseconds) */
@@ -53,6 +62,7 @@ public class DTNSimTextUI extends DTNSimUI {
 	 * interval hasn't been reached.
 	 */
 	private void update(boolean forced) {
+		double uiUpdateInterval = -1;
 		long now = System.currentTimeMillis();
 		long diff = now - this.lastUpdateRt;
 		double dur = (now - startTime)/1000.0;
@@ -64,9 +74,18 @@ public class DTNSimTextUI extends DTNSimUI {
 			
 			this.lastUpdateRt = System.currentTimeMillis();
 			this.lastUpdate = SimClock.getTime();
-		}		
+		}
+		if (uiUpdateInterval < 0) {
+			wait(99*(int)(-uiUpdateInterval));
+    	}
 	}
-	
+	private void wait(int ms) {
+		try {
+			Thread.sleep(ms);
+		} catch (InterruptedException e) {
+			// nothing to do here
+		}
+	}
 	private void print(String txt) {
 		System.out.println(txt);
 	}

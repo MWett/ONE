@@ -27,6 +27,11 @@ import core.SimClock;
  * Graphical User Interface for simulator
  */
 public class DTNSimGUI extends DTNSimUI {
+	public DTNSimGUI(int runindex) {
+		super(runindex);
+		// TODO Auto-generated constructor stub
+	}
+
 	private MainWindow main;
 	private PlayField field;
 	private GUIControls guiControls;
@@ -314,7 +319,7 @@ public class DTNSimGUI extends DTNSimUI {
 		}
 	}
 	
-	/**
+	/** 
 	 * Handler for playfield's mouse clicks.
 	 */
 	private class PlayfieldMouseHandler extends MouseAdapter implements 
@@ -323,12 +328,13 @@ public class DTNSimGUI extends DTNSimUI {
 		 * If mouse button is clicked, centers view at that location.
 		 */
 		public void mouseClicked(MouseEvent e) {
-			
+			getParentFrame().chooser.clearFilters();
 			java.awt.Point p = e.getPoint();
 			centerViewAt(field.getWorldPosition(new Coord(p.x, p.y)));
 		}
 		
 		public void mouseWheelMoved(java.awt.event.MouseWheelEvent e) {
+			getParentFrame().chooser.clearFilters();
 			guiControls.changeZoom(e.getWheelRotation());
 		}
 	}

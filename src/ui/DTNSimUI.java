@@ -58,15 +58,17 @@ public abstract class DTNSimUI {
 	protected SimScenario scen;
 	/** simtime of last UI update */
 	protected double lastUpdate;
+	public int runindex=0;
 	
 	/**
 	 * Constructor.
 	 */
-	public DTNSimUI() {
+	public DTNSimUI(int runindex) {
 		this.lastUpdate = 0;
 		this.reports = new Vector<Report>();
 		this.simDone = false;
 		this.simCancelled = false;
+		this.runindex = runindex;
 	}
 	
 	/**

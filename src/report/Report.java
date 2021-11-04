@@ -108,18 +108,26 @@ public abstract class Report {
 		}
 		
 		if (settings.contains(OUTPUT_SETTING)) {
+			settings.setNameSpace(null);
+			String outDir = settings.getSetting(REPORTDIR_SETTING);
 			outFileName = settings.getSetting(OUTPUT_SETTING);
 			// fill value place holders in the name
 			outFileName = settings.valueFillString(outFileName);
+			outFileName = "../"+ outDir + scenarioName + outFileName + Settings.getRunIndex()+
+					"_" + this.getClass().getSimpleName();
+			if (outputInterval == -1) {
+				outFileName += OUT_SUFFIX; // no intervalled reports
+			}
 		}
 		else {
 			// no output name define -> construct one from report class' name
 			settings.setNameSpace(null);
 			String outDir = settings.getSetting(REPORTDIR_SETTING);
+			
 			if (!outDir.endsWith("/")) {
 				outDir += "/";	// make sure dir ends with directory delimiter
 			}
-			outFileName = outDir + scenarioName + 
+			outFileName = "../" + outDir + scenarioName + Settings.getRunIndex()+
 				"_" + this.getClass().getSimpleName();
 			if (outputInterval == -1) {
 				outFileName += OUT_SUFFIX; // no intervalled reports
@@ -185,7 +193,16 @@ public abstract class Report {
 			createOutput(outFileName);
 		}
 	}
-	
+	protected void init(boolean append) {
+		this.lastReportTime = getSimTime();
+		
+		if (outputInterval > 0) {
+			createSuffixedOutput(outFileName);
+		}
+		else {
+			createOutput(outFileName, append);
+		}
+	}
 	/**
 	 * Creates a new output file
 	 * @param outFileName Name (&path) of the file to create
@@ -198,7 +215,14 @@ public abstract class Report {
 					"' for report output\n" + e.getMessage(), e);
 		}		
 	}
-	
+	private void createOutput(String outFileName, boolean append) {
+		try {
+			this.out = new PrintWriter(new FileWriter(outFileName, append));
+		} catch (IOException e) {
+			throw new SimError("Couldn't open file '" + outFileName + 
+					"' for report output\n" + e.getMessage(), e);
+		}		
+	}
 	/**
 	 * Creates a number-suffixed output file with increasing number suffix
 	 * @param outFileName Prefix of the output file's name
@@ -235,7 +259,7 @@ public abstract class Report {
 		if (out == null) {
 			init();
 		}
-		out.println(prefix + txt);
+		out.append(prefix + txt);
 	}
 	
 	/**

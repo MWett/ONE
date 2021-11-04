@@ -102,6 +102,9 @@ public class Settings {
 		runIndex = index;
 		writtenSettings.clear();
 	}
+	public static int getRunIndex() {
+		return runIndex;
+	}
 	
 	/**
 	 * Checks that the given integer array contains a valid range. I.e., 

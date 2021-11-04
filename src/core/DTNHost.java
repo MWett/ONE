@@ -4,10 +4,15 @@
  */
 package core;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 
+import blockchain.BCMessage;
+import blockchain.BCNode;
+import blockchain.Block;
 import movement.MovementModel;
 import movement.Path;
 import routing.MessageRouter;
@@ -16,7 +21,7 @@ import routing.util.RoutingInfo;
 /**
  * A DTN capable host.
  */
-public class DTNHost implements Comparable<DTNHost> {
+public class DTNHost extends BCNode implements Comparable<DTNHost> {
 	private static int nextAddress = 0;
 	private int address;
 
@@ -33,7 +38,18 @@ public class DTNHost implements Comparable<DTNHost> {
 	private List<MovementListener> movListeners;
 	private List<NetworkInterface> net;
 	private ModuleCommunicationBus comBus;
-
+	/*
+	public ArrayList<Block> blockchain
+	    = new ArrayList<Block>();
+	public int difficulty = 4;
+	public PrivateKey privateKey;
+	public PublicKey publicKey;
+	
+	public PrivateKey privateKey2;
+	public PublicKey publicKey2;
+	public int messages = 0;
+	private ArrayList<PublicKey> publicKeys = new ArrayList<PublicKey>();*/
+	
 	static {
 		DTNSim.registerForReset(DTNHost.class.getCanonicalName());
 		reset();
@@ -81,13 +97,34 @@ public class DTNHost implements Comparable<DTNHost> {
 
 		this.nextTimeToMove = movement.nextPathAvailable();
 		this.path = null;
-
+		//System.out.println("Host created with Blockchain");
+		//Message m = new Message(this, this, 1, address);
+		//createNewMessage(null);
 		if (movLs != null) { // inform movement listeners about the location
 			for (MovementListener l : movLs) {
 				l.initialLocation(this, this.location);
 			}
 		}
+		if (debuglevel == 1) System.out.println("Generating Keys...");
+		if (debuglevel == 1) System.out.println("aufruf?");
+    	generateKeyPair();
+    	try {
+			buildKeyPair();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	if (debuglevel == 1) System.out.println("Keys generated!");  
+    	if (debuglevel == 1) System.out.println("PublicKey: " + this.getPublicKey()); 
+    	if (debuglevel == 1) System.out.println("PrivateKey: " + this.getPrivateKey());   
+    	String s = Base64.getEncoder().encodeToString(this.getPublicKey().getEncoded());
+    	String t = Base64.getEncoder().encodeToString(this.getPrivateKey().getEncoded());
+    	if (debuglevel == 1) System.out.println("PublicKey: " + s); 
+    	if (debuglevel == 1) System.out.println("PrivateKey: " + t);   
+    	
+    	if (debuglevel == 1) System.out.println("Node created");
 	}
+	
 	
 	/**
 	 * Returns a new network interface address and increments the address for
@@ -250,7 +287,10 @@ public class DTNHost implements Comparable<DTNHost> {
 	public RoutingInfo getRoutingInfo() {
 		return this.router.getRoutingInfo();
 	}
-
+	
+	public ArrayList<Block> getBCInfo() {
+		return blockchain;
+	}
 	/**
 	 * Returns the interface objects of the node
 	 */
@@ -308,6 +348,8 @@ public class DTNHost implements Comparable<DTNHost> {
 		
 		if (up) {
 			ni.createConnection(no);
+			System.out.println("INTERACTION");
+			if(!this.Interacting() && !anotherHost.Interacting())interact(this, anotherHost);
 		} else {
 			ni.destroyConnection(no);
 		}
@@ -492,7 +534,10 @@ public class DTNHost implements Comparable<DTNHost> {
 	 * @param m The message to create
 	 */
 	public void createNewMessage(Message m) {
-		this.router.createNewMessage(m);
+		BCMessage bc = generateMessage();
+		bc.setCreationTime(SimClock.getTime());
+		addBlock(new Block(bc, lastHash()));
+		//this.router.createNewMessage(m);
 	}
 
 	/**

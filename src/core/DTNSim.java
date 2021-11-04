@@ -18,7 +18,7 @@ public class DTNSim {
 	/** If this option ({@value}) is given to program, batch mode and
 	 * Text UI are used*/
 	public static final String BATCH_MODE_FLAG = "-b";
-	/** Delimiter for batch mode index range values (colon) */
+	/** Delimiter for batch mode index range values (colon) */ 
 	public static final String RANGE_DELIMETER = ":";
 	
 	/** Name of the static method that all resettable classes must have
@@ -82,14 +82,14 @@ public class DTNSim {
 				print("Run " + (i+1) + "/" + nrofRuns[1]);
 				Settings.setRunIndex(i);
 				resetForNextRun();
-				new DTNSimTextUI().start();
+				new DTNSimTextUI(i).start();
 			}
 			double duration = (System.currentTimeMillis() - startTime)/1000.0;
 			print("---\nAll done in " + String.format("%.2f", duration) + "s");
 		}
 		else {
 			Settings.setRunIndex(guiIndex);
-			new DTNSimGUI().start();
+			new DTNSimGUI(guiIndex).start();
 		}
 	}
 	

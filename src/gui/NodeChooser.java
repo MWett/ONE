@@ -17,6 +17,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -182,7 +183,7 @@ public class NodeChooser extends JPanel implements ActionListener {
 		for (int i=offset; i< shownNodes.size() && 
 			i < offset + MAX_NODE_COUNT; i++) {
 			DTNHost h = shownNodes.get(i);
-			JButton jb = new JButton(h.toString());
+			JButton jb = new JButton(h.toString() + " " + h.blockchain.size());
 			jb.putClientProperty(HOST_KEY, h);
 			jb.addActionListener(this);
 			nodesPanel.add(jb);

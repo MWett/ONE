@@ -71,6 +71,8 @@ abstract public class NetworkInterface implements ModuleCommunicationListener {
 	/** this interface's activeness jitter value */
 	private int activenessJitterValue;
 
+	private int debuglevel = 0;
+	private long startTime= 0;
 	static {
 		DTNSim.registerForReset(NetworkInterface.class.getCanonicalName());
 		reset();
@@ -316,6 +318,7 @@ abstract public class NetworkInterface implements ModuleCommunicationListener {
 	 * @param anotherInterface The interface to connect to
 	 */
 	protected void connect(Connection con, NetworkInterface anotherInterface) {
+		
 		this.connections.add(con);
 		notifyConnectionListeners(CON_UP, anotherInterface.getHost());
 
@@ -324,6 +327,21 @@ abstract public class NetworkInterface implements ModuleCommunicationListener {
 
 		// inform routers about the connection
 		this.host.connectionUp(con);
+
+		long startTime = System.nanoTime();
+		if (debuglevel == 2)System.out.println(host.toString() + " connected to " + anotherInterface.getHost().toString());
+		if(!this.host.Interacting() && !anotherInterface.getHost().Interacting()) {
+			if (debuglevel == 2)System.out.println("Interaction!" + host.toString());
+			host.connectionStart = System.nanoTime();
+			anotherInterface.getHost().connectionStart = System.nanoTime();
+			host.setConnected(true);
+			this.host.setInteracting(true);
+			anotherInterface.getHost().setInteracting(true);
+			this.host.interact(this.host, anotherInterface.getHost());
+		}
+		long stopTime = System.nanoTime();
+		if (debuglevel == 2)System.out.println("ConUp: " + (stopTime - startTime));
+		if (debuglevel == 2)System.out.println("Interaction!");
 		anotherInterface.getHost().connectionUp(con);
 	}
 
@@ -334,10 +352,15 @@ abstract public class NetworkInterface implements ModuleCommunicationListener {
 	 */
 	protected void disconnect(Connection con, 
 			NetworkInterface anotherInterface) {
+		//System.out.println(host.toString() + "connected for: " + (System.nanoTime() - host.connectionStart));
+		startTime = 0;
 		con.setUpState(false);
 		notifyConnectionListeners(CON_DOWN, anotherInterface.getHost());
-
+		if(host.getConnected()) host.setConnected(false);
 		// tear down bidirectional connection
+		//System.out.println(host.toString() + " disconnected from " + anotherInterface.getHost().toString());
+		//if (host.Interacting()) System.out.println(host.toString() + " still Interacting...");
+		//else System.out.println("Interacting finished");
 		if (!anotherInterface.getConnections().remove(con)) {
 			throw new SimError("No connection " + con + " found in " +
 					anotherInterface);	
@@ -345,6 +368,9 @@ abstract public class NetworkInterface implements ModuleCommunicationListener {
 
 		this.host.connectionDown(con);
 		anotherInterface.getHost().connectionDown(con);
+		/*while (host.Interacting()) {
+			System.out.println("still interacting");
+		}*/
 	}
 
 	/**

@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import blockchain.Block;
 import movement.MapBasedMovement;
 import movement.MovementModel;
 import movement.map.SimMap;
@@ -313,7 +314,7 @@ public class SimScenario implements Serializable {
 	 */
 	protected void createHosts() {
 		this.hosts = new ArrayList<DTNHost>();
-
+		Block b = new Block("Genesis Block", "0"); 
 		for (int i=1; i<=nrofGroups; i++) {
 			List<NetworkInterface> interfaces = 
 				new ArrayList<NetworkInterface>();
@@ -391,6 +392,7 @@ public class SimScenario implements Serializable {
 				DTNHost host = new DTNHost(this.messageListeners, 
 						this.movementListeners,	gid, interfaces, comBus, 
 						mmProto, mRouterProto);
+				host.addBlock(b);
 				hosts.add(host);
 			}
 		}
