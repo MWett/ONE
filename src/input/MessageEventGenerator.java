@@ -12,7 +12,7 @@ import core.SettingsError;
 /**
  * Message creation -external events generator. Creates uniformly distributed
  * message creation patterns whose message size and inter-message intervals can
- * be configured.
+ * be configured. 
  */
 public class MessageEventGenerator implements EventQueue {
 	/** Message size range -setting id ({@value}). Can be either a single

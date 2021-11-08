@@ -74,14 +74,14 @@ public class DTNHost extends BCNode implements Comparable<DTNHost> {
 		this.address = getNextAddress();
 		this.name = groupId+address;
 		this.net = new ArrayList<NetworkInterface>();
-
+		//hostList.add(this);
 		for (NetworkInterface i : interf) {
 			NetworkInterface ni = i.replicate();
 			ni.setHost(this);
 			net.add(ni);
 		}	
 
-		// TODO - think about the names of the interfaces and the nodes
+		// TODO - think about the names of the interfaces and the nodes 
 		//this.name = groupId + ((NetworkInterface)net.get(1)).getAddress();
 
 		this.msgListeners = msgLs;
@@ -531,10 +531,11 @@ public class DTNHost extends BCNode implements Comparable<DTNHost> {
 
 	/**
 	 * Creates a new message to this host's router
-	 * @param m The message to create
+	 * @param m The message to create 
 	 */
 	public void createNewMessage(Message m) {
-		BCMessage bc = generateMessage();
+		DTNHost rec = m.getTo();
+		BCMessage bc = generateMessage(rec);
 		bc.setCreationTime(SimClock.getTime());
 		addBlock(new Block(bc, lastHash()));
 		//this.router.createNewMessage(m);

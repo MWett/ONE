@@ -1,21 +1,26 @@
 package blockchain;
 import java.security.*;
 import javax.crypto.Cipher;
+
+import core.DTNHost;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class BCMessage {
 	
-	public int messageID; // this is also the hash of the transaction.
-	private transient PublicKey sender; // senders address/public key.
-	private transient PublicKey recipient; // Recipients address/public key.
-	private transient PublicKey sigKey; // senders address/public key.
+	public int messageID;
+	private transient PublicKey sender;
+	private transient PublicKey recipient;
+	private transient PublicKey sigKey;
+	
+	public DTNHost host;
 	private String message;
 	private transient byte[] cipher;
 	private double creationTime;
 	private double deliveryTime;
-	private byte[] signature; // this is to prevent anybody else from spending funds in our wallet.
-	//public MessageClassification msgClass;
+	private byte[] signature; 
+	
 	public ArrayList<String> alTypes = new ArrayList<String>(Arrays.asList(
 			"Emergency",
 			"Road Safety",
@@ -24,10 +29,9 @@ public class BCMessage {
 	private int type;
 	private String description;
 	private boolean delivered = false;
-	//public ArrayList<TransactionInput> inputs = new ArrayList<TransactionInput>();
-	//public ArrayList<TransactionOutput> outputs = new ArrayList<TransactionOutput>();
+
 	
-	private static int sequence = 0; // a rough count of how many transactions have been generated. 
+	private static int sequenceShift = 0;
 	
 	public boolean isMine(PublicKey pk) {
 		if(recipient == pk) {
@@ -99,31 +103,29 @@ public class BCMessage {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//this.inputs = inputs;
 	}
-	// This Calculates the transaction hash (which will be used as its Id)
 	private String calulateHash() {
-		sequence++; //increase the sequence to avoid 2 identical transactions having the same hash
-		return StringUtil.applySha256(
-				StringUtil.getStringFromKey(sender) +
-				StringUtil.getStringFromKey(recipient) +
-				message + sequence
+		sequenceShift++;
+		return SignatureBuilder.applySha256(
+				SignatureBuilder.getStringFromKey(sender) +
+				SignatureBuilder.getStringFromKey(recipient) +
+				message + sequenceShift
 				);
 	}
-	//Signs all the data we dont wish to be tampered with.
+
 	public void generateSignature(PrivateKey privateKey) {
-		String data = StringUtil.getStringFromKey(sigKey) + StringUtil.getStringFromKey(recipient) + message	;
-		signature = StringUtil.applyECDSASig(privateKey,data);	
+		String data = SignatureBuilder.getStringFromKey(sigKey) + SignatureBuilder.getStringFromKey(recipient) + message	;
+		signature = SignatureBuilder.applyECDSASig(privateKey,data);	
 		//System.out.println("verified: " + verifiySignature());
 	}
-	//Verifies the data we signed hasnt been tampered with
+
 	public boolean verifiySignature() {
-		String data = StringUtil.getStringFromKey(sigKey) + StringUtil.getStringFromKey(recipient) + message	;
-		return StringUtil.verifyECDSASig(sigKey, data, signature);
+		String data = SignatureBuilder.getStringFromKey(sigKey) + SignatureBuilder.getStringFromKey(recipient) + message	;
+		return SignatureBuilder.verifyECDSASig(sigKey, data, signature);
 	}
 	public boolean verifiySignature(PublicKey pk) {
-		String data = StringUtil.getStringFromKey(pk) + StringUtil.getStringFromKey(recipient) + message	;
-		return StringUtil.verifyECDSASig(pk, data, signature);
+		String data = SignatureBuilder.getStringFromKey(pk) + SignatureBuilder.getStringFromKey(recipient) + message	;
+		return SignatureBuilder.verifyECDSASig(pk, data, signature);
 	}
 	public void encrypt(PublicKey publicKey, String message) throws Exception {
         Cipher cipher = Cipher.getInstance("RSA");  

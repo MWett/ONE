@@ -33,7 +33,7 @@ public class World {
 	
 	/**
 	 * Should the connectivity simulation be stopped after one round 
-	 * -setting id ({@value}). Boolean (true/false) variable. 
+	 * -setting id ({@value}). Boolean (true/false) variable.  
 	 */
 	public static final String SIMULATE_CON_ONCE_S = "simulateConnectionsOnce";
 

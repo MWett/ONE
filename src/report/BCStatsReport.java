@@ -4,6 +4,7 @@
  */
 package report;
 
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,8 +58,8 @@ public class BCStatsReport extends Report implements UpdateListener {
 	}
 	@Override
 	public void done() {
-		//write("Message stats for scenario " + getScenarioName() + 
-		//		"\nsim_time: " + format(getSimTime()));
+		//write("Message stats for scenario " + getScenari oName() +  
+		//		"\nsim_time: " + format(getSimTime()));  
 		int nrofBCMessages = 0;
 		int nrofDelivered = 0;
 		int nrofInteractions = 0;
