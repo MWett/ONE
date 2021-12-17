@@ -537,7 +537,26 @@ public class DTNHost extends BCNode implements Comparable<DTNHost> {
 		DTNHost rec = m.getTo();
 		BCMessage bc = generateMessage(rec);
 		bc.setCreationTime(SimClock.getTime());
+		/*int dif = 4;
+		String hashTarget = new String(new char[difficulty]).replace('\0', '0');
+		hashTarget = new String(new char[dif]).replace('\0', '0');
+		String h = lastHash().substring( 0, dif);
+		while(!h.equals(hashTarget)) {
+			//System.out.println(currentBlock.hash);
+			//System.out.println(previousBlock.hash);
+			System.out.println("Block is being mined");
+			h = lastHash().substring( 0, dif);
+			//return false;
+		}*/
 		addBlock(new Block(bc, lastHash()));
+		/*Thread thread = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+			}
+		});
+		thread.start();*/
+		
 		//this.router.createNewMessage(m);
 	}
 

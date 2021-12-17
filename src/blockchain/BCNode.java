@@ -194,14 +194,18 @@ public class BCNode {
 				}
 				//BCMessage bc = generateMessage();
 				//n1.addBlock(new Block(bc, n1.lastHash()));
-				/*if(connected) */al = mergeBlockchain(n1.blockchain,n2.blockchain); 
+				/*if(connected) */
+				if(isChainValid(n1.blockchain) && isChainValid(n2.blockchain)) {
+					
+				
+				al = mergeBlockchain(n1.blockchain,n2.blockchain); 
 				/*else {
 					System.out.println("disconnected at mergeBlockchain");
 					return;
 				}*/
-				if(isChainValid(al)) {
+				//if(isChainValid(al)) {
 					//System.out.println(true);
-				}
+				
 				//else System.out.println(false);
 				/*if(connected) */n1.updateBlockchain(al); 
 				checkForMessages(n1.blockchain);
@@ -219,6 +223,12 @@ public class BCNode {
 				}*/
 				if (debuglevel == 1) printBlockchain(n1.blockchain);
 				//if(tempMsgEx != messagesexchanged) interactions--;
+				//}
+				//else System.out.println("invalid - BC not updated!" + al.size());
+				}
+				else {
+					interactions++;
+				}
 				interacting = false;
 				n2.setInteracting(false);
 				long stopTime = System.nanoTime();
@@ -250,7 +260,12 @@ public class BCNode {
 			previousBlock = b.get(i-1);
 			dif = currentBlock.getMessage().getType();
 			hashTarget = new String(new char[dif]).replace('\0', '0');
-
+			while(!currentBlock.getHash().substring( 0, dif).equals(hashTarget)) {
+				//System.out.println(currentBlock.hash);
+				//System.out.println(previousBlock.hash);
+				System.out.println("This block hasn't been mined");
+				//return false;
+			}
 			if(!currentBlock.getHash().equals(currentBlock.calculateHash()) ){
 				System.out.println("Current Hashes not equal");	
 				return false;
@@ -258,15 +273,35 @@ public class BCNode {
 
 			if(!previousBlock.getHash().equals(currentBlock.getPreviousHash()) ) {
 				System.out.println("Previous Hashes not equal");
+				System.out.println(previousBlock.getHash() + " " + currentBlock.getPreviousHash());
 				return false;
 			}
 
-			if(!currentBlock.getHash().substring( 0, dif).equals(hashTarget)) {
-				//System.out.println(currentBlock.hash);
-				//System.out.println(previousBlock.hash);
-				System.out.println("This block hasn't been mined");
-				return false;
-			}
+			
+		}
+		return true;
+	}
+	
+	public Boolean isBlockValid(Block currentBlock, Block previousBlock) {
+		int dif = 4;
+		String hashTarget = new String(new char[difficulty]).replace('\0', '0');
+		dif = currentBlock.getMessage().getType();
+		hashTarget = new String(new char[dif]).replace('\0', '0');
+		if(!currentBlock.getHash().substring( 0, dif).equals(hashTarget)) {
+			//System.out.println(currentBlock.hash);
+			//System.out.println(previousBlock.hash);
+			System.out.println("This block hasn't been mined");
+			//return false;
+		}
+		if(!currentBlock.getHash().equals(currentBlock.calculateHash()) ){
+			System.out.println("Current Hashes not equal");	
+			return false;
+		}
+
+		if(!previousBlock.getHash().equals(currentBlock.getPreviousHash()) ) {
+			System.out.println("Previous Hashes not equal");
+			System.out.println(previousBlock.getHash() + " " + currentBlock.getPreviousHash());
+			return false;
 		}
 		return true;
 	}
@@ -288,7 +323,7 @@ public class BCNode {
 			randomNum = ThreadLocalRandom.current().nextInt(0, 4);
 			description = classificationDescription[type][randomNum];
 		}
-		BCMessage bcm = new BCMessage(publicKey2, pk, description, messages, type, privateKey, publicKey);
+		BCMessage bcm = new BCMessage(publicKey2, pk, description, messages, type+1, privateKey, publicKey);
 		messages++;
 		
 		return bcm;
@@ -333,16 +368,13 @@ public class BCNode {
 	public ArrayList<Block> mergeBlockchain(ArrayList<Block> bchain1, ArrayList<Block> bchain2) {
 		ArrayList<Block> gChain;
 		ArrayList<Block> sChain;
-		if(bchain1.size()>1 && bchain2.size()>1) {
-			int a = 0;
-		}
-		if(bchain1.size()>=bchain2.size()) {
+		if(bchain1.size()>bchain2.size()) {
 			gChain = bchain1;
 			sChain = bchain2;
 		}
 		else {
 			if(bchain1.size()==bchain2.size()) {
-				if(bchain1.get(bchain1.size()).getNonce() >= bchain2.get(bchain2.size()).getNonce()) {
+				if(bchain1.get(bchain1.size()-1).getNonce() >= bchain2.get(bchain2.size()-1).getNonce()) {
 					gChain = bchain1;
 					sChain = bchain2;
 				}
@@ -371,6 +403,7 @@ public class BCNode {
 			BCMessage bcm = sChain.get(i).getMessage();
 			if(!alM.contains(bcm)) {
 				PublicKey pk = bcm.getSigKey();
+				Block prevBlock = gChain.get(gChain.size()-1);
 				if(SignaturePK.contains(pk)) {
 					if (debuglevel>1)System.out.println("Signature verified: " + bcm.verifiySignature(pk));
 				}
@@ -378,10 +411,15 @@ public class BCNode {
 					if (debuglevel>1)System.out.println("Unknown Key");
 					if (debuglevel>1)System.out.println("Signature verified: " + bcm.verifiySignature(pk));
 				}
-				Block nextBlock = new Block(bcm, gChain.get(gChain.size()-1).getHash());
+				Block nextBlock = new Block(bcm, prevBlock.getHash());
+				//nextBlock.mineBlock(difficulty);
+				nextBlock.mineBlock(bcm.getType()+1);
 				gChain.add(nextBlock);
-				gChain.get(gChain.size()-1).mineBlock(bcm.getType()+1);
-				//gChain.get(gChain.size()-1).mineBlock(4);
+				//gChain.get(gChain.size()-1).mineBlock(bcm.getType()+1);
+				//gChain.get(gChain.size()-1).mineBlock(difficulty);
+				if(!isBlockValid(nextBlock, prevBlock) ){
+					System.out.println("Block not valid!");
+				}
 				tmp++;
 			}
 			else if (debuglevel>1) System.out.println("Blockchain contains Message already!");
@@ -397,7 +435,10 @@ public class BCNode {
 			messagesexchanged +=tmp;
 			interactions++;
 		}
-		else if (debuglevel>1) System.out.println("No new messages added!");
+		else if (debuglevel>1) {
+			interactions++;
+			System.out.println("No new messages added!");
+		}
 			
 		
 		return gChain;

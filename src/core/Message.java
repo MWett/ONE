@@ -10,10 +10,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import blockchain.BCMessage;
+
 /**
  * A message that is created at a node or passed between nodes.
  */
-public class Message implements Comparable<Message> {
+public class Message extends BCMessage implements Comparable<Message> {
 	/** Value for infinite TTL of message */
 	public static final int INFINITE_TTL = -1;
 	private DTNHost from;

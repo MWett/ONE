@@ -265,7 +265,7 @@ public abstract class Report {
 	/**
 	 * Formats a double value according to current precision setting (see
 	 * {@link #PRECISION_SETTING}) and returns it in a string.
-	 * @param value The value to format
+	 * @param value The value to format 
 	 * @return Formatted value in a string
 	 */
 	protected String format(double value) {
