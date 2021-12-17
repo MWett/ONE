@@ -1,0 +1,1 @@
+java -Xmx512M -cp .;lib/ECLA.jar;lib/DTNConsoleConnection.jar core.DTNSim %* -b 3 126hostsT2.txt

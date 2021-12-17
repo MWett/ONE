@@ -43,6 +43,9 @@ public class BCMessage {
 		return sigKey;
 	}
 	// Constructor: 
+	public BCMessage() {
+		
+	}
 	public BCMessage(PublicKey from, PublicKey to, String message, int id, int type, String description) {//,  ArrayList<TransactionInput> inputs) {
 		this.sender = from;
 		this.recipient = to;
